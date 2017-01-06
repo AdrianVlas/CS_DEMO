@@ -1,0 +1,909 @@
+#include "../inc/bv3.h"//lib
+#include "../inc/stm32f2xx_conf.h"
+
+
+#include "../inc/const_global.h"
+#include "../inc/const_measurement.h"
+#include "../inc/struct_def.h"
+#include "../inc/constants.h"
+#include "../inc/libraries.h"
+#include "../inc/variables_external.h"
+#include "../inc/macroses.h"
+
+#include "../tui/cmd_df.h"
+#include "InitPrt.h"
+#include "prt.h"
+#include "cmd_f1.h"
+const long TestArray[] = {
+SIZE_ANALOG_DATA,
+SIZE_EVT_LOG_DATA,
+SIZE_TIMELAB_SLICE,
+SIZEOF_AREC_SLICE,
+SIZEOF_AR_ARECBUF,
+MNU_CMD_OT4_RESET_MN_RNK_LIST
+
+};
+const char arCmd_f_IN_Lgr_f [] = { //Secuence Cmd_f 
+HVSW_ON_DI_LGRF_ONB          ,//00 Вкл. ВВ от ДВ 
+HVSW_OFF_DI_LGRF_ONB         ,//01. Откл. ВВ 
+CTRL_VKL_DI_LGRF_ONB         ,//02. Контроль Вкл
+CTRL_OTKL_DI_LGRF_ONB        ,//03. Контроль Откл
+RESET_SIGOUT_DI_LGRF_ONB     ,//04. Сброс Реле	
+RESET_LED_DI_LGRF_ONB        ,//05. Сброс индикации
+BLOCK_SWITCHOVER_DI_LGRF_ONB ,//06. Блокировка включения ВВ
+SWITCH_STATE_DI_LGRF_ONB     ,//07. Положение ВВ (выключателя)
+PERMIT_BLK_SW_MCP_DI_LGRF_ONB,//08. РазБлокировкa Вкл. ВВ общ
+BLOCK_MCP1_DI_LGRF_ONB       ,//09. Блокировка МТЗ1
+BLOCK_MCP2_DI_LGRF_ONB       ,//10. Блокировка МТЗ2
+BLOCK_MCP3_DI_LGRF_ONB       ,//11. Блокировка МТЗ3
+BLOCK_MCP4_DI_LGRF_ONB       ,//12. Блокировка МТЗ4
+BLOCK_ACCLT_MCP2_DI_LGRF_ONB ,//13. Блокировка ускорения МТЗ2 ;
+SEC_GR_UST_DI_LGRF_ONB       ,//14. 2группа уставок МТЗ
+BLOCK_NZZ_DI_LGRF_ONB        ,//15. Блокировка НЗЗ   
+AFU_DI_LGRF_ONB              ,//16. АЧР/ЧАПВ;
+BLOCK_ARCL_DI_LGRF_ONB       ,//17. Блокировка АПВ
+BLOCK_UMIN1_DI_LGRF_ONB      ,//18. Блокировка Umin1
+START_UMIN1_DI_LGRF_ONB      ,//19. Пуск Umin1
+BLOCK_UMIN2_DI_LGRF_ONB      ,//20. Блокировка Umin2
+START_UMIN2_DI_LGRF_ONB      ,//21. Пуск Umin2
+BLOCK_TZNP1_DI_LGRF_ONB      ,//22. Блокировка ТЗНП1
+BLOCK_TZNP2_DI_LGRF_ONB      ,//23. Блокировка ТЗНП2
+BLOCK_TZNP3_DI_LGRF_ONB      ,//24. Блокировка ТЗНП3
+BLOCK_ZOP1_DI_LGRF_ONB       ,//25. Блокировка ЗОП1
+BLOCK_ZOP2_DI_LGRF_ONB       ,//26. Блокировка ЗОП2
+START_UROV_DI_LGRF_ONB       ,//27. Пуск УРОВ
+BLOCK_UMAX1_DI_LGRF_ONB      ,//28. Блокировка UMAX1
+BLOCK_UMAX2_DI_LGRF_ONB      ,//29. Блокировка UMAX2
+DRIVER_SW_DI_LGRF_ONB        ,//30. Привод ВВ
+STP_ZDZ_DI_LGRF_ONB          ,//31.  Пуск ЗДЗ
+STPDEV_SECTOR_MCP1_STAIGHT_LGRF_ONB,//32- 00.Сектор МТЗН1Впер  
+STPDEV_SECTOR_MCP1_BACK_LGRF_ONB   ,//33- 01.Сектор МТЗН1ННазад
+STPDEV_SECTOR_MCP2_STAIGHT_LGRF_ONB,//34- 02.Сектор МТЗН2Впер  
+STPDEV_SECTOR_MCP2_BACK_LGRF_ONB   ,//35- 03.Сектор МТЗН2ННазад
+STPDEV_SECTOR_MCP3_STAIGHT_LGRF_ONB,//36- 04.Сектор МТЗН3Впер    
+STPDEV_SECTOR_MCP3_BACK_LGRF_ONB   ,//37- 05.Сектор МТЗН3ННазад
+STPDEV_SECTOR_MCP4_STAIGHT_LGRF_ONB,//38- 06.Сектор МТЗН4Впер    
+STPDEV_SECTOR_MCP4_BACK_LGRF_ONB   ,//39- 07.Сектор МТЗН4ННазад
+STPDEV_MCP1_BORING_LGRF_ONB        ,//40- 08.Сраб ПО МТЗ1
+STPDEV_MCP1_STAIGHT_LGRF_ONB       ,//41- 09.Сраб ПО МТЗН1Впер
+STPDEV_MCP1_BACK_LGRF_ONB          ,//42- 10.Сраб ПО МТЗН1ННазад
+STPDEV_MCP1_VLT_LGRF_ONB           ,//43- 11.Сраб ПО МТЗ1ПН
+STPDEV_MCP2_BORING_LGRF_ONB        ,//44- 12.Сраб ПО МТЗ2
+STPDEV_MCP2_STAIGHT_LGRF_ONB       ,//45- 13.Сраб ПО МТЗ2Н1Впер
+STPDEV_MCP2_BACK_LGRF_ONB          ,//46- 14.Сраб ПО МТЗ2ННазад
+STPDEV_MCP2_VLT_LGRF_ONB           ,//47- 15.Сраб ПО МТЗ2ПН
+STPDEV_MCP3_BORING_LGRF_ONB        ,//48- 16.Сраб ПО МТЗ3
+STPDEV_MCP3_STAIGHT_LGRF_ONB       ,//49- 17.Сраб ПО МТЗ3НВпер
+STPDEV_MCP3_BACK_LGRF_ONB          ,//50- 18.Сраб ПО МТЗ3ННазад
+STPDEV_MCP3_VLT_LGRF_ONB           ,//51- 19.Сраб ПО МТЗ3ПН
+STPDEV_MCP4_BORING_LGRF_ONB        ,//52- 20.Сраб ПО МТЗ4
+STPDEV_MCP4_STAIGHT_LGRF_ONB       ,//53- 21.Сраб ПО МТЗ4НВпер
+STPDEV_MCP4_BACK_LGRF_ONB          ,//54- 22.Сраб ПО МТЗ4ННазад
+STPDEV_MCP4_VLT_LGRF_ONB           ,//55- 23.Сраб ПО МТЗ4ПН
+MCP1_LGRF_ONB                      ,//56- 24.Сраб МТЗ1
+MCP2_LGRF_ONB                      ,//57- 25.Сраб МТЗ2
+MCP3_LGRF_ONB                      ,//58- 26.Сраб МТЗ3
+MCP4_LGRF_ONB                      ,//59- 27.Сраб МТЗ4
+ARCL_LGRF_ONB                      ,//60-28.Сраб АПВ
+UROV1_LGRF_ONB                     ,//61-29.Сраб УРОВ1
+UROV2_LGRF_ONB                     ,//62-30.Сраб УРОВ1
+ZDZ_WK_LGRF_ONB                    ,//63-31.Сраб  ЗДЗ  
+FAULT_TEST_LGRF_ONB         ,//64-0
+STPDEV_SECTOR_NZZ_LGRF_ONB  ,//65-1 .Сектор НЗЗ
+STPDEV_3I0_LGRF_ONB         ,//66-2 .Сраб ПО 3I0
+WKD_3I0_LGRF_ONB            ,//67-3 .Сраб 3I0
+STPDEV_3U0_LGRF_ONB         ,//68-4 .Сраб ПО 3U0
+WKD_3U0_LGRF_ONB            ,//69-5 .Сраб 3U0
+STPDEV_NZZ_LGRF_ONB         ,//70-6 .Сраб ПО НЗЗ
+NZZ_LGRF_ONB                ,//71-7 .Сраб НЗЗ
+STPDEV_UMIN1_LGRF_ONB       ,//72-8 .Сраб ПО Umin1
+UMIN1_LGRF_ONB              ,//73-9 .Сраб Umin1
+STPDEV_UMIN2_LGRF_ONB       ,//74-10 .Сраб ПО Umin2
+UMIN2_LGRF_ONB              ,//75-11 .Сраб Umin2
+STPDEV_SECTOR_TZNP1_LGRF_ONB,//76-12 .Сектор ТЗНП1
+STPDEV_TZNP1_LGRF_ONB       ,//77-13 .Сраб ПО ТЗНП1
+WKD_TZNP1_LGRF_ONB          ,//78-14 .Сраб ТЗНП1
+STPDEV_SECTOR_TZNP2_LGRF_ONB,//79-15 .Сектор ТЗНП2
+STPDEV_TZNP2_LGRF_ONB       ,//80-16 .Сраб ПО ТЗНП2
+WKD_TZNP2_LGRF_ONB          ,//81-17 .Сраб ТЗНП2
+STPDEV_SECTOR_TZNP3_LGRF_ONB,//82-18 .Сектор ТЗНП3
+STPDEV_TZNP3_LGRF_ONB       ,//83-19 .Сраб ПО ТЗНП3
+WKD_TZNP3_LGRF_ONB          ,//84-20 .Сраб ТЗНП3
+STPDEV_ZOP1_LGRF_ONB        ,//85-21 .Сраб ПО ЗОП1
+ZOP1_LGRF_ONB               ,//86-22 .Сраб ЗОП1
+STPDEV_ZOP2_LGRF_ONB        ,//87-23 .Сраб ПО ЗОП2
+ZOP2_LGRF_ONB               ,//88-24 .Сраб ЗОП2
+STPDEV_UMAX1_LGRF_ONB       ,//89-25 .Сраб ПО UMAX1
+UMAX1_LGRF_ONB              ,//90-26 .Сраб UMAX1
+STPDEV_UMAX2_LGRF_ONB       ,//91-27 .Сраб ПО UMAX2
+UMAX2_LGRF_ONB              ,//92-28 .Сраб UMAX2
+SW_OFF_LGRF_ONB              ,//93-29 .Работа БО
+SW_ON_LGRF_ONB             ,//94-30 .Работа БВ
+NCN_MCP_LGRF_ONB            ,//95-31 .  НЦН-МТЗ
+OUT_EDF1_LGRF_ONB,//96    -00.Выход О-функция1 
+OUT_EDF2_LGRF_ONB,//97    -01.Выход О-функция2 
+OUT_EDF3_LGRF_ONB,//98    -02.Выход О-функция3 
+OUT_EDF4_LGRF_ONB,//99    -03.Выход О-функция4 
+OUT_EDF5_LGRF_ONB,//100   -04.Выход О-функция5 
+OUT_EDF6_LGRF_ONB,//101   -05.Выход О-функция6 
+OUT_EDF7_LGRF_ONB,//102   -06.Выход О-функция7 
+OUT_EDF8_LGRF_ONB,//103   -07.Выход О-функция8 
+OUT_OT1_LGRF_ONB ,//104   -08.выход ОТ1 
+OUT_OT2_LGRF_ONB ,//105   -09.Выход ОТ2 
+OUT_OT3_LGRF_ONB ,//106   -10.выход ОТ3 
+OUT_OT4_LGRF_ONB ,//107   -11.Выход ОТ4 
+0xff,//108   -12. 
+0xff,//109   -13. 
+0xff,//110   -14. 
+0xff,//111   -15. 
+0xff,//112  -16.  
+0xff,//113  -17. 
+0xff,//114  -18. 
+0xff,//115  -19. 
+0xff,//116  -20. 
+0xff,//117  -21. 
+0xff,//118  -22. 
+0xff,//119  -23. 
+0xff,//120  -24. 
+0xff,//121  -25. 
+0xff,//122  -26. 
+0xff,//123  -27. 
+0xff,//124  -28. РЕЗЕРВ
+0xff,//125  -29. РЕЗЕРВ
+0xff,//126  -30. РЕЗЕРВ
+0xff,//127  -31. РЕЗЕРВ
+EDF1_IN_LGRF_ONB     ,   //128  -00. Определяемая функция1 Вх Оф1      
+EDF2_IN_LGRF_ONB     ,   //129  -01. Определяемая функция2 Вх Оф2      
+EDF3_IN_LGRF_ONB     ,   //130  -02. Определяемая функция3 Вх Оф3      
+EDF4_IN_LGRF_ONB     ,   //131  -03. Определяемая функция4 Вх Оф4      
+EDF5_IN_LGRF_ONB     ,   //132  -04. Определяемая функция5 Вх Оф5      
+EDF6_IN_LGRF_ONB     ,   //133  -05. Определяемая функция6 Вх Оф6      
+EDF7_IN_LGRF_ONB     ,   //134  -06. Определяемая функция7 Вх Оф7      
+EDF8_IN_LGRF_ONB     ,   //135  -07. Определяемая функция8 Вх Оф8      
+SET_OT1___IN_LGRF_ONB,   //136  -08. Установка ОТ1         Вх Уст   От1
+RESET_OT1_IN_LGRF_ONB,   //137  -09. Сброс ОТ1             Вх Сброс От1
+SET_OT2___IN_LGRF_ONB,   //138  -10. Установка ОТ2         Вх Уст От2  
+RESET_OT2_IN_LGRF_ONB,   //139  -11. Сброс ОТ2             Вх Сброс От2
+SET_OT3___IN_LGRF_ONB,   //140  -12. Установка ОТ3         Вх Уст От3  
+RESET_OT3_IN_LGRF_ONB,   //141  -13. Сброс ОТ3             Вх Сброс От3
+SET_OT4___IN_LGRF_ONB,   //142  -14. Установка ОТ4         Вх Уст От4  
+RESET_OT4_IN_LGRF_ONB,   //143  -15. Сброс ОТ4             Вх Сброс От4
+0xff,   //144   -16. РЕЗЕРВ
+0xff,   //145   -17. РЕЗЕРВ
+0xff,   //146   -18. РЕЗЕРВ 
+0xff,   //147   -19. РЕЗЕРВ
+0xff,   //148   -20. РЕЗЕРВ
+0xff,   //149   -21. РЕЗЕРВ 
+0xff,   //150   -22. РЕЗЕРВ 
+0xff,   //151   -23. РЕЗЕРВ
+0xff,   //152   -24. РЕЗЕРВ
+0xff,   //153   -25. РЕЗЕРВ 
+0xff,   //154   -26. РЕЗЕРВ  
+0xff,   //155   -27. РЕЗЕРВ
+0xff,   //156   -28. РЕЗЕРВ
+0xff,   //157   -29. РЕЗЕРВ
+0xff,   //158   -30. РЕЗЕРВ
+0xff,   //159   -31. РЕЗЕРВ 						
+   
+};
+/*
+const char arCmd_f_IN_Lgr_f [] = { //Secuence Cmd_f 
+0xff,//START_OFFSET_DI_LGRF_ONB        //00. РЕЗЕРВ
+HVSW_ON_DI_LGRF_ONB          ,   //01. Вкл. ВВ от ДВ 
+HVSW_OFF_DI_LGRF_ONB         ,   //02. Откл. ВВ от ДВ
+CTRL_VKL_DI_LGRF_ONB         ,   //03. Контроль Вкл
+CTRL_OTKL_DI_LGRF_ONB        ,   //04. Контроль Откл
+CTRL_OUT_DI_LGRF_ONB         ,   //05. Контроль Выход
+DRIVER_SW_DI_LGRF_ONB        ,   //06. Привод ВВ
+RESET_SIGOUT_DI_LGRF_ONB     ,   //07. Сброс Реле	
+RESET_LED_DI_LGRF_ONB        ,   //08. Сброс индикации
+BLOCK_SWITCHOVER_DI_LGRF_ONB ,   //09. Блокировка включения ВВ
+SWITCH_STATE_DI_LGRF_ONB     ,   //10. Положение ВВ (выключателя)
+PERMIT_BLK_SW_MCP_DI_LGRF_ONB,   //11. РазБлокировкa  Вкл. ВВ общ
+BLOCK_MCP1_DI_LGRF_ONB       ,   //12. Блокировка МТЗ1
+BLOCK_MCP2_DI_LGRF_ONB       ,   //13. Блокировка МТЗ2
+BLOCK_MCP3_DI_LGRF_ONB       ,   //14. Блокировка МТЗ3
+BLOCK_ACCLT_DI_LGRF_ONB      ,   //15. Блокировка ускорения МТЗ ;
+SEC_GR_UST_DI_LGRF_ONB       ,   //16. 2группа уставок 
+0xff,                            //RESERV17_LGRF_ONB               //17. РЕЗЕРВ
+0xff,                             //RESERV18_LGRF_ONB               //18. РЕЗЕРВ
+BLOCK_NZZ_DI_LGRF_ONB  ,         //19. Блокировка НЗЗ   
+RESERV20_LGRF_ONB      ,         //20. РЕЗЕРВ
+AFU_DI_LGRF_ONB        ,         //21. АЧР/ЧАПВ;
+BLOCK_ARCL_DI_LGRF_ONB ,         //22. Блокировка АПВ
+BLOCK_UMIN_DI_LGRF_ONB ,         //23. Блокировка Umin
+START_UMIN_DI_LGRF_ONB ,         //24. Пуск Umin
+0xff                   ,         //RESERV25_LGRF_ONB               //25. РЕЗЕРВ//Блокировка 3I0
+BLOCK_ZOP1_DI_LGRF_ONB ,         //26. Блокировка ЗОП1
+BLOCK_ZOP2_DI_LGRF_ONB ,         //27. Блокировка ЗОП2
+START_UROV_DI_LGRF_ONB ,         //28. Пуск УРОВ
+BLOCK_UMAX1_DI_LGRF_ONB,         //29. Блокировка UMAX1
+BLOCK_UMAX2_DI_LGRF_ONB,         //30. Блокировка UMAX2
+0xff,                            //RESERV31_LGRF_ONB               //31. РЕЗЕРВ
+STPDEV_SECTOR_MCP1_STAIGHT_LGRF_ONB,   //32  -00.-00.Сектор МТЗН1Впер  
+STPDEV_SECTOR_MCP1_BACK_LGRF_ONB   ,   //33  -01.-01.Сектор МТЗН1ННазад
+STPDEV_SECTOR_MCP2_STAIGHT_LGRF_ONB,   //34  -02.-02.Сектор МТЗН2Впер  
+STPDEV_SECTOR_MCP2_BACK_LGRF_ONB   ,   //35  -03.-03.Сектор МТЗН2ННазад
+STPDEV_SECTOR_MCP3_STAIGHT_LGRF_ONB,   //36  -04.-04.Сектор МТЗН3Впер  
+STPDEV_SECTOR_MCP3_BACK_LGRF_ONB   ,   //37  -05.-05.Сектор МТЗН3ННазад
+0xff, //RESERV_38_LGRF_ONB                    //38  -06.
+0xff, //RESERV_39_LGRF_ONB                    //39  -07.
+0xff, //RESERV_40_LGRF_ONB                    //40  -08.
+0xff, //RESERV_41_LGRF_ONB                    //41  -09.
+0xff, //RESERV_42_LGRF_ONB                    //42  -10.
+0xff, //RESERV_43_LGRF_ONB                    //43  -11.
+0xff, //RESERV_44_LGRF_ONB                    //44  -12.
+0xff, //RESERV_45_LGRF_ONB                    //45  -13.
+0xff, //RESERV_46_LGRF_ONB                    //46  -14.
+0xff, //RESERV_47_LGRF_ONB                    //47  -15. РЕЗЕРВ
+STPDEV_MCP1_BORING_LGRF_ONB ,          //48  -16. Сраб ПО МТЗ1  
+STPDEV_MCP1_STAIGHT_LGRF_ONB,          //49  -17. Сраб ПО МТЗН1Впер 
+STPDEV_MCP1_BACK_LGRF_ONB   ,          //50  -18. Сраб ПО МТЗН1ННазад 
+STPDEV_MCP1_VLT_LGRF_ONB    ,          //51  -19. Сраб ПО МТЗПН  
+STPDEV_MCP2_BORING_LGRF_ONB ,          //52  -20. Сраб ПО МТЗ2  
+STPDEV_MCP2_STAIGHT_LGRF_ONB,          //53  -21. Сраб ПО МТЗ2Н1Впер  
+STPDEV_MCP2_BACK_LGRF_ONB   ,          //54  -22. Сраб ПО МТЗ2ННазад  
+STPDEV_MCP2_VLT_LGRF_ONB    ,          //55  -23. Сраб ПО МТЗ2ПН  
+STPDEV_MCP3_BORING_LGRF_ONB ,          //56  -24. Сраб ПО МТЗ3   
+STPDEV_MCP3_STAIGHT_LGRF_ONB,          //57  -25. Сраб ПО МТЗ3НВпер   
+STPDEV_MCP3_BACK_LGRF_ONB   ,          //58  -26. Сраб ПО МТЗ3ННазад   
+STPDEV_MCP3_VLT_LGRF_ONB    ,          //59  -27. Сраб ПО МТЗ3ПН   
+MCP1_LGRF_ONB,                         //60  -28. Сраб МТЗ1   
+MCP2_LGRF_ONB,                         //61  -29.  Сраб МТЗ2   
+MCP3_LGRF_ONB,                         //62  -30.  Сраб МТЗ3   
+0xff, //RESERV_63_LGRF_ONB                    //63  -31.  
+FAULT_TEST_LGRF_ONB       ,   //64  -00.  Неисправность
+ARCL_LGRF_ONB             ,   //65  -01.  Сраб АПВ
+STPDEV_SECTOR_NZZ_LGRF_ONB,   //66  -02.  Сектор НЗЗ 
+STPDEV_3I0_LGRF_ONB       ,   //67  -03.  Сраб ПО 3I0
+WKD_3I0_LGRF_ONB          ,   //68  -04.  Сраб 3I0   
+STPDEV_3U0_LGRF_ONB       ,   //69  -05.  Сраб ПО 3U0
+WKD_3U0_LGRF_ONB          ,   //70  -06.  Сраб 3U0   
+STPDEV_NZZ_LGRF_ONB       ,   //71  -07.  Сраб ПО НЗЗ
+NZZ_LGRF_ONB              ,   //72  -08.  Сраб НЗЗ   
+STPDEV_UMIN_LGRF_ONB      ,   //73  -09.  Сраб ПО Umin
+UMIN_LGRF_ONB             ,   //74  -10.  Сраб Umin
+STPDEV_ZOP1_LGRF_ONB      ,   //75  -11.  Сраб ПО ЗОП1
+ZOP1_LGRF_ONB             ,   //76  -12.  Сраб ЗОП1
+STPDEV_ZOP2_LGRF_ONB      ,   //77  -13.  Сраб ПО ЗОП2
+ZOP2_LGRF_ONB             ,   //78  -14.  Сраб ЗОП2
+UROV1_LGRF_ONB            ,   //79  -15.  Сраб УРОВ1
+UROV2_LGRF_ONB            ,   //80  -16.  Сраб УРОВ2
+STPDEV_UMAX1_LGRF_ONB     ,   //81  -17.  Сраб ПО UMAX1
+UMAX1_LGRF_ONB            ,   //82  -18.  Сраб UMAX1
+STPDEV_UMAX2_LGRF_ONB     ,   //83  -19.  Сраб ПО UMAX2
+UMAX2_LGRF_ONB            ,   //84  -20.  Сраб UMAX2
+0xff, //RESERV85_LGRF_ONB            //85  -21.  РЕЗЕРВ
+0xff, //RESERV86_LGRF_ONB            //86  -22.  РЕЗЕРВ
+0xff, //RESERV87_LGRF_ONB            //87  -23.  РЕЗЕРВ
+0xff, //RESERV88_LGRF_ONB            //88  -24.  РЕЗЕРВ
+0xff, //RESERV89_LGRF_ONB            //89  -25.  РЕЗЕРВ
+0xff, //RESERV90_LGRF_ONB            //90  -26.  РЕЗЕРВ
+0xff, //RESERV91_LGRF_ONB            //91  -27.  РЕЗЕРВ
+0xff, //RESERV92_LGRF_ONB            //92  -28.  РЕЗЕРВ
+0xff, //RESERV93_LGRF_ONB            //93  -29.  РЕЗЕРВ
+SW_OFF_LGRF_ONB   ,            //94  -30.  Работа БО 
+SW_ON_LGRF_ONB ,            //95  -31.  Работа БВ 
+OUT_EDF1_LGRF_ONB,      //96    -00.Выход О-функция1 
+OUT_EDF2_LGRF_ONB,      //97    -01.Выход О-функция2 
+OUT_EDF3_LGRF_ONB,      //98    -02.Выход О-функция3 
+OUT_EDF4_LGRF_ONB,      //99    -03.Выход О-функция4 
+OUT_EDF5_LGRF_ONB,      //100   -04.Выход О-функция5 
+OUT_EDF6_LGRF_ONB,      //101   -05.Выход О-функция6 
+OUT_EDF7_LGRF_ONB,      //102   -06.Выход О-функция7 
+OUT_EDF8_LGRF_ONB,      //103   -07.Выход О-функция8 
+OUT_OT1_LGRF_ONB ,      //104   -08.выход ОТ1 
+OUT_OT2_LGRF_ONB ,      //105   -09.Выход ОТ2 
+OUT_OT3_LGRF_ONB ,      //106   -10.выход ОТ3 
+OUT_OT4_LGRF_ONB ,      //107   -11.Выход ОТ4 
+0xff, //RESERV108_LGRF_ONB     //108   -12. 
+0xff, //RESERV109_LGRF_ONB     //109   -13. 
+0xff, //RESERV110_LGRF_ONB     //110   -14. 
+0xff, //RESERV111_LGRF_ONB     //111   -15. 
+0xff, //RESERV112_LGRF_ONB     //112  -16.  
+0xff, //RESERV113_LGRF_ONB     //113  -17. 
+0xff, //RESERV114_LGRF_ONB     //114  -18. 
+0xff, //RESERV115_LGRF_ONB     //115  -19. 
+0xff, //RESERV116_LGRF_ONB     //116  -20. 
+0xff, //RESERV117_LGRF_ONB     //117  -21. 
+0xff, //RESERV118_LGRF_ONB     //118  -22. 
+0xff, //RESERV119_LGRF_ONB     //119  -23. 
+0xff, //RESERV120_LGRF_ONB     //120  -24. 
+0xff, //RESERV121_LGRF_ONB     //121  -25. 
+0xff, //RESERV122_LGRF_ONB     //122  -26. 
+0xff, //RESERV123_LGRF_ONB     //123  -27. 
+0xff, //RESERV124_LGRF_ONB     //124  -28. РЕЗЕРВ
+0xff, //RESERV125_LGRF_ONB     //125  -29. РЕЗЕРВ
+0xff, //RESERV126_LGRF_ONB     //126  -30. РЕЗЕРВ
+0xff, //RESERV127_LGRF_ONB     //127  -31. РЕЗЕРВ
+EDF1_IN_LGRF_ONB     ,   //128  -00. Определяемая функция1 Вх Оф1      
+EDF2_IN_LGRF_ONB     ,   //129  -01. Определяемая функция2 Вх Оф2      
+EDF3_IN_LGRF_ONB     ,   //130  -02. Определяемая функция3 Вх Оф3      
+EDF4_IN_LGRF_ONB     ,   //131  -03. Определяемая функция4 Вх Оф4      
+EDF5_IN_LGRF_ONB     ,   //132  -04. Определяемая функция5 Вх Оф5      
+EDF6_IN_LGRF_ONB     ,   //133  -05. Определяемая функция6 Вх Оф6      
+EDF7_IN_LGRF_ONB     ,   //134  -06. Определяемая функция7 Вх Оф7      
+EDF8_IN_LGRF_ONB     ,   //135  -07. Определяемая функция8 Вх Оф8      
+SET_OT1___IN_LGRF_ONB,   //136  -08. Установка ОТ1         Вх Уст   От1
+RESET_OT1_IN_LGRF_ONB,   //137  -09. Сброс ОТ1             Вх Сброс От1
+SET_OT2___IN_LGRF_ONB,   //138  -10. Установка ОТ2         Вх Уст От2  
+RESET_OT2_IN_LGRF_ONB,   //139  -11. Сброс ОТ2             Вх Сброс От2
+SET_OT3___IN_LGRF_ONB,   //140  -12. Установка ОТ3         Вх Уст От3  
+RESET_OT3_IN_LGRF_ONB,   //141  -13. Сброс ОТ3             Вх Сброс От3
+SET_OT4___IN_LGRF_ONB,   //142  -14. Установка ОТ4         Вх Уст От4  
+RESET_OT4_IN_LGRF_ONB,   //143  -15. Сброс ОТ4             Вх Сброс От4
+0xff,   //144   -16. РЕЗЕРВ
+0xff,   //145   -17. РЕЗЕРВ
+0xff,   //146   -18. РЕЗЕРВ 
+0xff,   //147   -19. РЕЗЕРВ
+0xff,   //148   -20. РЕЗЕРВ
+0xff,   //149   -21. РЕЗЕРВ 
+0xff,   //150   -22. РЕЗЕРВ 
+0xff,   //151   -23. РЕЗЕРВ
+0xff,   //152   -24. РЕЗЕРВ
+0xff,   //153   -25. РЕЗЕРВ 
+0xff,   //154   -26. РЕЗЕРВ  
+0xff,   //155   -27. РЕЗЕРВ
+0xff,   //156   -28. РЕЗЕРВ
+0xff,   //157   -29. РЕЗЕРВ
+0xff,   //158   -30. РЕЗЕРВ
+0xff,   //159   -31. РЕЗЕРВ 						
+   
+   
+   
+   
+   
+   
+};
+*/
+
+										  
+											  
+
+
+const char arAtrs_f_IN_Cmd_f [] = { 
+
+0xff                 ,//00. РЕЗЕРВ
+HVSW_ON_DI_CMDF_ONB  ,//01. Вкл.  ВВ   
+HVSW_OFF_DI_CMDF_ONB ,//02. Откл. ВВ 
+0xff,//03. Reserv
+0xff,//04. Reserv
+0xff,//05. Reserv
+0xff,//06. Reserv
+RESET_SIGOUT_DI_CMDF_ONB,//07. Сброс Реле	
+RESET_LED_DI_CMDF_ONB   ,//08. Сброс индикации
+0xff,//09. РЕЗЕРВ
+EDF1_IN_CMDF_ONB  ,//10.  -.  Вх Определяемая функция1
+EDF2_IN_CMDF_ONB  ,//11.  -.  Вх Определяемая функция2
+EDF3_IN_CMDF_ONB  ,//12.  -.  Вх Определяемая функция3
+EDF4_IN_CMDF_ONB  ,//13.  -.  Вх Определяемая функция4
+EDF5_IN_CMDF_ONB  ,//14.  -.  Вх Определяемая функция5
+EDF6_IN_CMDF_ONB  ,//15.  -.  Вх Определяемая функция6
+EDF7_IN_CMDF_ONB  ,//16.  -.  Вх Определяемая функция7
+EDF8_IN_CMDF_ONB  ,//17.  -.  Вх Определяемая функция8
+SET_OT1_CMDF_ONB  ,//18.  -.  Вх Установка ОТ1
+RESET_OT1_CMDF_ONB,//19.  -.  Вх Сброс ОТ1    
+SET_OT2_CMDF_ONB  ,//20.  -.  Вх Установка ОТ2
+RESET_OT2_CMDF_ONB,//21.  -.  Вх Сброс ОТ2    
+SET_OT3_CMDF_ONB  ,//22.  -.  Вх Установка ОТ3
+RESET_OT3_CMDF_ONB,//23.  -.  Вх Сброс ОТ3    
+SET_OT4_CMDF_ONB  ,//24.  -.  Вх Установка ОТ4
+RESET_OT4_CMDF_ONB,//25.  -.  Вх Сброс ОТ4    
+0xff,//26. Reserv
+0xff,//27. Reserv
+0xff,//28. Reserv
+0xff,//29. Reserv
+0xff,//30. Reserv
+0xff//31. Reserv
+
+};
+const char arAtrsNew_f_IN_Cmd_f [] = { 
+
+HVSW_ON_DI_CMDF_ONB     ,//00. Вкл.  ВВ
+HVSW_OFF_DI_CMDF_ONB    ,//01. Откл. ВВ   
+0xff                    ,//02.  
+0xff                    ,//03. Reserv
+RESET_SIGOUT_DI_CMDF_ONB,//04. 
+RESET_LED_DI_CMDF_ONB   ,//05. 
+0xff,//06. Reserv
+0xff,//07. 
+0xff,//08. 
+0xff,//09. РЕЗЕРВ
+EDF1_IN_CMDF_ONB  ,//10.  -.  Вх Определяемая функция1
+EDF2_IN_CMDF_ONB  ,//11.  -.  Вх Определяемая функция2
+EDF3_IN_CMDF_ONB  ,//12.  -.  Вх Определяемая функция3
+EDF4_IN_CMDF_ONB  ,//13.  -.  Вх Определяемая функция4
+EDF5_IN_CMDF_ONB  ,//14.  -.  Вх Определяемая функция5
+EDF6_IN_CMDF_ONB  ,//15.  -.  Вх Определяемая функция6
+EDF7_IN_CMDF_ONB  ,//16.  -.  Вх Определяемая функция7
+EDF8_IN_CMDF_ONB  ,//17.  -.  Вх Определяемая функция8
+SET_OT1_CMDF_ONB  ,//18.  -.  Вх Установка ОТ1
+RESET_OT1_CMDF_ONB,//19.  -.  Вх Сброс ОТ1    
+SET_OT2_CMDF_ONB  ,//20.  -.  Вх Установка ОТ2
+RESET_OT2_CMDF_ONB,//21.  -.  Вх Сброс ОТ2    
+SET_OT3_CMDF_ONB  ,//22.  -.  Вх Установка ОТ3
+RESET_OT3_CMDF_ONB,//23.  -.  Вх Сброс ОТ3    
+SET_OT4_CMDF_ONB  ,//24.  -.  Вх Установка ОТ4
+RESET_OT4_CMDF_ONB,//25.  -.  Вх Сброс ОТ4    
+0xff,//26. Reserv
+0xff,//27. Reserv
+0xff,//28. Reserv
+0xff,//29. Reserv
+0xff,//30. Reserv
+0xff//31. Reserv
+
+};
+
+//Patch array !
+const char arKeyRnk_f_IN_Atrs_f [] = { 
+
+1  ,//00.Вкл. ВВ от ДВ  
+2  ,//01.Откл. ВВ от ДВ    
+0xff,//02. Reserv
+0xff,//03. Reserv
+7,//04. Сброс Реле	
+8,//05. Сброс индикации
+0xff,//06. Reserv
+0xff//07. РЕЗЕРВ
+};
+/////////////////////////////////     ///////////////////////////////////////
+//arDiagnTaras_f_IN_Test_f [] = { 
+//0xff,//00. 
+//0xff,//01.   
+//0xff,//02. 
+//0xff,//03. 
+//0xff,//04. 
+//0xff,//05. 
+//0xff,//06. 
+//0xff,//07. 
+//0xff,//08. 
+//0xff,//09. 
+//0xff,//10.  -.  
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//};
+											  
+											  
+//This Array Used for Scan Result Test Data fof finding FATAL Error 
+const char arOnbFatalErrorList [] = { 
+SETNGS_EPR_SDFE_ONB           ,
+SETNGS_EPR_EMPTY_SDFE_ONB     ,
+SETNGS_EPR_COMPARISON_SDFE_ONB,
+SETNGS_EPR_CONTROL_SDFE_ONB   ,
+YST_EPR_SDFE_ONB              ,
+YST_EPR_COMPARISON_SDFE_ONB   ,
+YST_EPR_CONTROL_SDFE_ONB      ,
+YST_EPR_EMPTY_SDFE_ONB        ,
+VREF_ADC_TEST_SDFE_ONB        ,
+VDD_ADC_TEST_SDFE_ONB         ,
+SPI_RED_SDFE_ONB              ,
+TEST_RELAY_CHK_ONB            ,
+
+
+
+
+
+
+
+};
+
+////////////////////////////////     ///////////////////////////////////////
+const char arOnbTotalErrorList [] = { 
+SETNGS_EPR_SDFE_ONB            ,//.ERROR_SETTINGS_EEPROM_BIT = 0,                       
+SETNGS_EPR_EMPTY_SDFE_ONB      ,//.ERROR_SETTINGS_EEPROM_EMPTY_BIT,
+SETNGS_EPR_COMPARISON_SDFE_ONB ,//.ERROR_SETTINGS_EEPROM_COMPARISON_BIT,
+SETNGS_EPR_CONTROL_SDFE_ONB    ,//.ERROR_SETTINGS_EEPROM_CONTROL_BIT,
+YST_EPR_SDFE_ONB               ,//.ERROR_USTUVANNJA_EEPROM_BIT,
+YST_EPR_EMPTY_SDFE_ONB         ,//.ERROR_USTUVANNJA_EEPROM_EMPTY_BIT,
+YST_EPR_COMPARISON_SDFE_ONB    ,//.ERROR_USTUVANNJA_EEPROM_COMPARISON_BIT,
+YST_EPR_CONTROL_SDFE_ONB       ,//.ERROR_USTUVANNJA_EEPROM_CONTROL_BIT,
+LEDS_EPR_SDFE_ONB              ,//.ERROR_STATE_LEDS_EEPROM_BIT,
+OUTPUTS_EPR_SDFE_ONB           ,//.ERROR_STATE_OUTPUTS_EEPROM_BIT,
+LEDS_OUTPUTS_EPR_EMPTY_SDFE_ONB,//.ERROR_STATE_LEDS_OUTPUTS_EEPROM_EMPTY_BIT,
+LEDS_OUTPUTS_EPR_CMP_SDFE_ONB  ,//.ERROR_STATE_LEDS_OUTPUTS_EEPROM_COMPARISON_BIT,
+TRG_STATE_SDFE_ONB             ,//.ERROR_STATE_TRIGGERS_EEPROM_BIT,
+TRG_EPR_EMPTY_SDFE_ONB         ,//.ERROR_STATE_TRIGGERS_EEPROM_EMPTY_BIT,
+TRG_EPR_CMP_SDFE_ONB           ,//.ERROR_STATE_TRIGGERS_EEPROM_COMPARISON_BIT,
+AREC_EEPROM_SDFE_ONB           ,//.ERROR_INFO_REJESTRATOR_AR_EEPROM_BIT,
+AREC_EEPROM_EMPTY_SDFE_ONB     ,//.ERROR_INFO_REJESTRATOR_AR_EEPROM_EMPTY_BIT,
+AREC_COMPARISON_SDFE_ONB       ,//.ERROR_INFO_REJESTRATOR_AR_COMPARISON_BIT,
+AREC_CONTROL_SDFE_ONB          ,//.ERROR_INFO_REJESTRATOR_AR_CONTROL_BIT,
+DREC_EEPROM_SDFE_ONB           ,//.ERROR_INFO_REJESTRATOR_DR_EEPROM_BIT,
+DREC_EEPROM_EMPTY_SDFE_ONB     ,//.ERROR_INFO_REJESTRATOR_DR_EEPROM_EMPTY_BIT,
+DREC_COMPARISON_SDFE_ONB       ,//.ERROR_INFO_REJESTRATOR_DR_COMPARISON_BIT,
+DREC_CONTROL_SDFE_ONB          ,//.ERROR_INFO_REJESTRATOR_DR_CONTROL_BIT,
+PR_ERR_EEPROM_SDFE_ONB         ,//.ERROR_INFO_REJESTRATOR_PR_ERR_EEPROM_BIT,
+PR_ERR_EEPROM_EMPTY_SDFE_ONB   ,//.ERROR_INFO_REJESTRATOR_PR_ERR_EEPROM_EMPTY_BIT,
+PR_ERR_COMPARISON_SDFE_ONB     ,//.ERROR_INFO_REJESTRATOR_PR_ERR_COMPARISON_BIT,
+PR_ERR_CONTROL_SDFE_ONB        ,//.ERROR_INFO_REJESTRATOR_PR_ERR_CONTROL_BIT
+RTC_BATTERY_LOW_SDFE_ONB       ,//.RTC_BATTERY_LOW_BIT,
+RTC_OSCILLATOR_STOPED_SDFE_ONB ,//.RTC_OSCILLATOR_STOPED_BIT,
+RTC_OSCILLATOR_FAIL_SDFE_ONB   ,//.RTC_OSCILLATOR_FAIL_BIT,
+RTC_UPDATING_HALTED_SDFE_ONB   ,//.RTC_UPDATING_HALTED_BIT,
+RTC_WORK_FIELD_NOT_SET_SDFE_ONB,//.RTC_WORK_FIELD_NOT_SET_BIT
+VREF_ADC_TEST_SDFE_ONB         ,//.ERROR_VREF_ADC_TEST_BIT,
+VDD_ADC_TEST_SDFE_ONB          ,//.ERROR_VDD_ADC_TEST_BIT,
+VREF_ADC_COARSE_SDFE_ONB       ,//.ERROR_VREF_ADC_TEST_COARSE_BIT,
+VDD_ADC_COARSE_SDFE_ONB	       ,//.ERROR_VDD_ADC_TEST_COARSE_BIT,
+SPI_ADC_SDFE_ONB		       ,//.ERROR_SPI_ADC_BIT
+SPI_RED_SDFE_ONB               ,//.ERROR_SPI_RED_BIT -37
+TST_ROM_RESERV_CHK_ONB        ,//.64
+TST_RAM_RESERV_CHK_ONB        ,//.
+TEST_RELAY_CHK_ONB            ,//.
+TST_CHD01_CHK_ONB             ,//.
+TST_CHD02_CHK_ONB             ,//.
+TST_CHD03_CHK_ONB             ,//.
+TST_RESERV_CHK_ONB            ,//.
+WRITE_FLASH_AREC_ERR_CHK_ONB  ,//.
+WRITE_FLASH_DREC_ERR_CHK_ONB  ,//.
+RESET_MEAS_SYSTEM_CHK_ONB     ,//.
+RESET_SYSTEM_CHK_ONB          ,//.
+PROGRAM_FAULT_AREC_CHK_ONB    ,//.
+PROGRAM_FAULT_DREC_CHK_ONB    ,//.
+AREC_NOT_READY_CHK_ONB        ,
+DREC_NOT_READY_CHK_ONB        ,
+TEST_FLASH_PROGRAM_CHK_ONB    ,
+TEST_EXT_RAM_CHK_ONB          ,
+START_AREC_RECORD_TEST_CHK_ONB //. 81
+
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////////     ///////////////////////////////////////
+
+
+/////////////////////////////////     ///////////////////////////////////////
+
+//00. РЕЗЕРВ
+//01. Вкл. ВВ от ДВ 
+//02. Откл. ВВ от ДВ
+//03. Контроль Вкл
+//04. Контроль Откл
+//05. Контроль Выход
+//06. Привод ВВ
+//07. Сброс Реле	
+//08. Сброс индикации
+//09. Блокировка включения ВВ
+//10. Положение ВВ (выключателя)
+//11. РазБлокировкa  Вкл. ВВ общ
+//12. Блокировка МТЗ1
+//13. Блокировка МТЗ2
+//14. Блокировка МТЗ3
+//15. Блокировка ускорения МТЗ ;
+//16. 2группа уставок 
+//17. РЕЗЕРВ
+//18. РЕЗЕРВ
+//19. Блокировка НЗЗ   
+//20. РЕЗЕРВ
+//21. АЧР/ЧАПВ;
+//22. Блокировка АПВ
+//23. Блокировка Umin
+//24. Пуск Umin
+//25. РЕЗЕРВ//Блокировка 3I0
+//26. Блокировка ЗОП1
+//27. Блокировка ЗОП2
+//28. Пуск УРОВ
+//29. Блокировка UMAX1
+//30. Блокировка UMAX2
+//31. РЕЗЕРВ
+//32  -00.Сектор МТЗН1Впер  
+//33  -01.Сектор МТЗН1ННазад
+//34  -02.Сектор МТЗН2Впер  
+//35  -03.Сектор МТЗН2ННазад
+//36  -04.Сектор МТЗН3Впер  
+//37  -05.Сектор МТЗН3ННазад
+//38  -06.
+//39  -07.
+//40  -08.
+//41  -09.
+//42  -10.
+//43  -11.
+//44  -12.
+//45  -13.
+//46  -14.
+//47  -15. РЕЗЕРВ
+//48  -16. Сраб ПО МТЗ1  
+//49  -17. Сраб ПО МТЗН1Впер 
+//50  -18. Сраб ПО МТЗН1ННазад
+//51  -19. Сраб ПО МТЗПН  
+//52  -20. Сраб ПО МТЗ2  
+//53  -21. Сраб ПО МТЗ2Н1Впер 
+//54  -22. Сраб ПО МТЗ2ННазад 
+//55  -23. Сраб ПО МТЗ2ПН  
+//56  -24. Сраб ПО МТЗ3   
+//57  -25. Сраб ПО МТЗ3НВпер  
+//58  -26. Сраб ПО МТЗ3ННазад 
+//59  -27. Сраб ПО МТЗ3ПН   
+//60  -28. Сраб МТЗ1   
+//61  -29.  Сраб МТЗ2   
+//62  -30.  Сраб МТЗ3   
+//63  -31.  
+//64  -00.  Неисправность
+//65  -01.  Сраб АПВ
+//66  -02.  Сектор НЗЗ 
+//67  -03.  Сраб ПО 3I0
+//68  -04.  Сраб 3I0   
+//69  -05.  Сраб ПО 3U0
+//70  -06.  Сраб 3U0   
+//71  -07.  Сраб ПО НЗЗ
+//72  -08.  Сраб НЗЗ   
+//73  -09.  Сраб ПО Umin
+//74  -10.  Сраб Umin
+//75  -11.  Сраб ПО ЗОП1
+//76  -12.  Сраб ЗОП1
+//77  -13.  Сраб ПО ЗОП2
+//78  -14.  Сраб ЗОП2
+//79  -15.  Сраб УРОВ1
+//80  -16.  Сраб УРОВ2
+//81  -17.  Сраб ПО UMAX1
+//82  -18.  Сраб UMAX1
+//83  -19.  Сраб ПО UMAX2
+//84  -20.  Сраб UMAX2
+//85  -21.  РЕЗЕРВ
+//86  -22.  РЕЗЕРВ
+//87  -23.  РЕЗЕРВ
+//88  -24.  РЕЗЕРВ
+//89  -25.  РЕЗЕРВ
+//90  -26.  РЕЗЕРВ
+//91  -27.  РЕЗЕРВ
+//92  -28.  РЕЗЕРВ
+//93  -29.  РЕЗЕРВ
+//94  -30.  Работа БО 
+//95  -31.  Работа БВ 
+//96    -00.Выход О-функция1 
+//97    -01.Выход О-функция2 
+//98    -02.Выход О-функция3 
+//99    -03.Выход О-функция4 
+//100   -04.Выход О-функция5 
+//101   -05.Выход О-функция6 
+//102   -06.Выход О-функция7 
+//103   -07.Выход О-функция8 
+//104   -08.выход ОТ1 
+//105   -09.Выход ОТ2 
+//106   -10. 
+//107   -11. 
+//108   -12. 
+//109   -13. 
+//110   -14. 
+//111   -15. 
+//112  -16.  
+//113  -17. 
+//114  -18. 
+//115  -19. 
+//116  -20. 
+//117  -21. 
+//118  -22. 
+//119  -23. 
+//120  -24. 
+//121  -25. 
+//122  -26. 
+//123  -27. 
+//124  -28. РЕЗЕРВ
+//125  -29. РЕЗЕРВ
+//126  -30. РЕЗЕРВ
+//127  -31. РЕЗЕРВ
+//128  -00. Определяемая функция1 Вх Оф1      
+//129  -01. Определяемая функция2 Вх Оф2      
+//130  -02. Определяемая функция3 Вх Оф3      
+//131  -03. Определяемая функция4 Вх Оф4      
+//132  -04. Определяемая функция5 Вх Оф5      
+//133  -05. Определяемая функция6 Вх Оф6      
+//134  -06. Определяемая функция7 Вх Оф7      
+//135  -07. Определяемая функция8 Вх Оф8      
+//136  -08. Установка ОТ1         Вх Уст   От1
+//137  -09. Сброс ОТ1             Вх Сброс От1
+//138  -10. Установка ОТ2         Вх Уст От2  
+//139  -11. Сброс ОТ2             Вх Сброс От2
+//140  -12. Установка ОТ3         Вх Уст От3  
+//141  -13. Сброс ОТ3             Вх Сброс От3
+//142  -14. Установка ОТ4         Вх Уст От4  
+//143  -15. Сброс ОТ4             Вх Сброс От4
+//144   -16. РЕЗЕРВ
+//145   -17. РЕЗЕРВ
+//146   -18. РЕЗЕРВ 
+//147   -19. РЕЗЕРВ
+//148   -20. РЕЗЕРВ
+//149   -21. РЕЗЕРВ 
+//150   -22. РЕЗЕРВ 
+//151   -23. РЕЗЕРВ
+//152   -24. РЕЗЕРВ
+//153   -25. РЕЗЕРВ 
+//154   -26. РЕЗЕРВ  
+//155   -27. РЕЗЕРВ
+//156   -28. РЕЗЕРВ
+//157   -29. РЕЗЕРВ
+//158   -30. РЕЗЕРВ
+//159   -31. РЕЗЕРВ 						
+//160    00. РЕЗЕРВ
+//161   -01.. РЕЗЕРВ
+//162   -02.. РЕЗЕРВ 
+//163   -03.. РЕЗЕРВ  
+//164   -04.. РЕЗЕРВ
+//165   -05.. РЕЗЕРВ
+//166   -06.. РЕЗЕРВ
+//167   -07.. РЕЗЕРВ
+//168   -08.. РЕЗЕРВ 	
+//169   -09.. РЕЗЕРВ
+//170   -10.. РЕЗЕРВ
+//171   -11.. РЕЗЕРВ 
+//172   -12.. РЕЗЕРВ  
+//173   -13.. РЕЗЕРВ
+//174   -14.. РЕЗЕРВ
+//175   -15.. РЕЗЕРВ
+//176   -16.. РЕЗЕРВ
+//177   -17.. РЕЗЕРВ 	
+//178   -18.. РЕЗЕРВ
+//179   -19.. РЕЗЕРВ
+//180   -20.. РЕЗЕРВ 
+//181   -21.. РЕЗЕРВ  
+//182   -22.. РЕЗЕРВ
+//183   -23.. РЕЗЕРВ
+//184   -24.. РЕЗЕРВ
+//185   -25.. РЕЗЕРВ
+//186   -26.. РЕЗЕРВ 	
+//187   -27.. РЕЗЕРВ
+//188   -28.. РЕЗЕРВ
+//189   -29.. РЕЗЕРВ
+//190   -30.. РЕЗЕРВ
+//191   -31.. РЕЗЕРВ 
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+Test Str 11:58 06.01.2017
+
+
+
+
+
+
+
+
+//Order bit  Of  Lgr_f bit
+//00. РЕЗЕРВ
+//01. Вкл. ВВ от ДВ 
+//02. Откл. ВВ от ДВ
+//03. Контроль Вкл
+//04. Контроль Откл
+//05. Контроль Выход
+//06. Привод ВВ
+//07. Сброс Реле	
+//08. Сброс индикации
+//09. Блокировка включения ВВ
+//10. Положение ВВ (выключателя)
+//11. РазБлокировкa  Вкл. ВВ общ
+//12. Блокировка МТЗ1
+//13. Блокировка МТЗ2
+//14. Блокировка МТЗ3
+//15. Блокировка ускорения МТЗ ;
+//16. 2группа уставок 
+//17. РЕЗЕРВ
+//18. РЕЗЕРВ
+//19. Блокировка НЗЗ   
+//20. РЕЗЕРВ			  
+//21. АЧР/ЧАПВ;
+//22. Блокировка АПВ
+//23. Блокировка Umin
+//24. Пуск Umin
+//25. РЕЗЕРВ//Блокировка 3I0
+//26. Блокировка ЗОП1
+//27. Блокировка ЗОП2
+//28. Пуск УРОВ
+//29. Блокировка UMAX1
+//30. Блокировка UMAX2
+//31. РЕЗЕРВ
+//32  -00.Сектор МТЗН1Впер  
+//33  -01.Сектор МТЗН1ННазад
+//34  -02.Сектор МТЗН2Впер  
+//35  -03.Сектор МТЗН2ННазад
+//36  -04.Сектор МТЗН3Впер  
+//37  -05.Сектор МТЗН3ННазад
+//38  -06.
+//39  -07.
+//40  -08.
+//41  -09.
+//42  -10.
+//43  -11.
+//44  -12.
+//45  -13.
+//46  -14.
+//47  -15. РЕЗЕРВ
+//48  -16. Сраб ПО МТЗ1  
+//49  -17. Сраб ПО МТЗН1Впер 
+//50  -18. Сраб ПО МТЗН1ННазад 
+//51  -19. Сраб ПО МТЗПН  
+//52  -20. Сраб ПО МТЗ2  
+//53  -21. Сраб ПО МТЗ2Н1Впер  
+//54  -22. Сраб ПО МТЗ2ННазад  
+//55  -23. Сраб ПО МТЗ2ПН  
+//56  -24. Сраб ПО МТЗ3   
+//57  -25. Сраб ПО МТЗ3НВпер   
+//58  -26. Сраб ПО МТЗ3ННазад  
+//59  -27. Сраб ПО МТЗ3ПН   
+//60  -28. Сраб МТЗ1   
+//61  -29.  Сраб МТЗ2   
+//62  -30.  Сраб МТЗ3   
+//63  -31.  
+//64  -00.  Неисправность
+//65  -01.  Сраб АПВ
+//66  -02.  Сектор НЗЗ 
+//67  -03.  Сраб ПО 3I0
+//68  -04.  Сраб 3I0   
+//69  -05.  Сраб ПО 3U0
+//70  -06.  Сраб 3U0   
+//71  -07.  Сраб ПО НЗЗ
+//72  -08.  Сраб НЗЗ   
+//73  -09.  Сраб ПО Umin
+//74  -10.  Сраб Umin
+//75  -11.  Сраб ПО ЗОП1
+//76  -12.  Сраб ЗОП1
+//77  -13.  Сраб ПО ЗОП2
+//78  -14.  Сраб ЗОП2
+//79  -15.  Сраб УРОВ1
+//80  -16.  Сраб УРОВ2
+//81  -17.  Сраб ПО UMAX1
+//82  -18.  Сраб UMAX1
+//83  -19.  Сраб ПО UMAX2
+//84  -20.  Сраб UMAX2
+//85  -21.  РЕЗЕРВ
+//86  -22.  РЕЗЕРВ
+//87  -23.  РЕЗЕРВ
+//88  -24.  РЕЗЕРВ
+//89  -25.  РЕЗЕРВ
+//90  -26.  РЕЗЕРВ
+//91  -27.  РЕЗЕРВ
+//92  -28.  РЕЗЕРВ
+//93  -29.  РЕЗЕРВ
+//94  -30.  Работа БО 
+//95  -31.  Работа БВ 
+//96    -00.Выход О-функция1 
+//97    -01.Выход О-функция2 
+//98    -02.Выход О-функция3 
+//99    -03.Выход О-функция4 
+//100   -04.Выход О-функция5 
+//101   -05.Выход О-функция6 
+//102   -06.Выход О-функция7 
+//103   -07.Выход О-функция8 
+//104   -08.выход ОТ1 
+//105   -09.Выход ОТ2 
+//106   -10. 
+//107   -11. 
+//108   -12. 
+//109   -13. 
+//110   -14. 
+//111   -15. 
+//112  -16.  Вх Определяемая функция1
+//113  -17.  Вх Определяемая функция2
+//114  -18.  Вх Определяемая функция3
+//115  -19.  Вх Определяемая функция4
+//116  -20.  Вх Определяемая функция5
+//117  -21.  Вх Определяемая функция6
+//118  -22.  Вх Определяемая функция7
+//119  -23.  Вх Определяемая функция8
+//120  -24.  Вх Установка ОТ1
+//121  -25.  Вх Сброс ОТ1    
+//122  -26.  Вх Установка ОТ2
+//123  -27.  Вх Сброс ОТ2    
+//124  -28.  Вх Установка ОТ3
+//125  -29.  Вх Сброс ОТ3    
+//126  -30. РЕЗЕРВ
+//127  -31. РЕЗЕРВ	
+
